@@ -3,7 +3,16 @@ use std::fs::read_dir;
 use std::os::unix::fs::PermissionsExt;
 
 fn main() {
-    let target_dir = env::args().nth(1).unwrap_or_else(|| ".".to_string());
+    let mut a_flag = false;
+    let mut target_dir = ".".to_string();
+
+    for arg in env::args().skip(1) {
+        if arg == "-a" {
+            a_flag = true;
+        } else {
+            target_dir = arg;
+        }
+    }
     let list = read_dir(target_dir).expect("ERROR");
 
     let mut entries: Vec<_> = Vec::new();
@@ -20,6 +29,9 @@ fn main() {
         let perm = parse_permissions(mode);
         let name = file_name.to_string_lossy();
 
+        if !a_flag && name.starts_with(".") {
+            continue;
+        }
         print!("{is_dir}{perm} ");
         print!("{:>8} ", metadata.len());
         println!("{name}");
