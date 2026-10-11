@@ -6,8 +6,13 @@ fn main() {
     let target_dir = env::args().nth(1).unwrap_or_else(|| ".".to_string());
     let list = read_dir(target_dir).expect("ERROR");
 
+    let mut entries: Vec<_> = Vec::new();
     for entry in list {
         let entry = entry.expect("ERROR");
+        entries.push(entry);
+    }
+    entries.sort_by_key(|entry| entry.file_name());
+    for entry in entries {
         let file_name = entry.file_name();
         let metadata = entry.metadata().expect("ERROR");
         let is_dir = if metadata.is_dir() { "d" } else { "-" };
@@ -16,7 +21,7 @@ fn main() {
         let name = file_name.to_string_lossy();
 
         print!("{is_dir}{perm} ");
-        print!("{} ", metadata.len());
+        print!("{:>8} ", metadata.len());
         println!("{name}");
     }
 }
